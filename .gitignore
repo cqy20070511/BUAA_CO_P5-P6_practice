@@ -11,3 +11,5 @@ submissions/
 .venv/
 .DS_Store
 Thumbs.db
+/tests/
+/p5/tests/
