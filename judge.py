@@ -1,4 +1,4 @@
-"""P5 原生 Icarus 仿真评测：目录或 ZIP，默认全题 24 点，JSON/实时回调。"""
+"""P6 原生 Icarus 仿真评测：目录或 ZIP，默认全题 24 点，JSON/实时回调。"""
 import argparse
 import json
 import os
@@ -23,11 +23,10 @@ def parse(raw):
     if not m:return None
     pc,kind,addr,value=m.groups()
     if re.search('[xz]',pc+addr+value,re.I):return kind,'UNKNOWN '+raw.strip()
-    if kind=='$' and not addr.isdecimal():return kind,'INVALID REGISTER LOG '+raw.strip()
     return kind,f'@{int(pc,16):08x}: {kind}{int(addr,10) if kind=="$" else format(int(addr,16),"08x")} <= {int(value,16):08x}'
 
 
-def _evaluate(expected,output,returncode=0,timed_out=False):
+def evaluate(expected,output,returncode=0,timed_out=False):
     actual=[parse(line) for line in output.splitlines()]
     actual=[x for x in actual if x]
     # M 和 W 可以在不同周期交错；分别比较两条有序的体系结构事件流。
@@ -53,21 +52,6 @@ def _evaluate(expected,output,returncode=0,timed_out=False):
     if 'JUDGE_DONE' not in output:return dict(status='TLE' if 'JUDGE_LIMIT' in output else 'RE',message='未观察到完成标记')
     m=re.search(r'JUDGE_DONE cycles=(\d+)',output)
     return dict(status='AC',message='Accepted.',cycles=int(m.group(1)))
-
-
-def evaluate(expected,output,returncode=0,timed_out=False):
-    marker=expected[-1] if expected else None
-    completed=any(parse(line) and parse(line)[1]==marker for line in output.splitlines())
-    normalized=output.replace('JUDGE_END','JUDGE_DONE' if completed else 'JUDGE_LIMIT')
-    result=_evaluate(expected,normalized,returncode,timed_out)
-    if result['status']=='AC':
-        for line in output.splitlines():
-            item=parse(line)
-            if item and item[1]==marker:
-                prefix=re.match(r'^(\d+)',line.strip())
-                if prefix:result['completion_log_time']=prefix.group(1)
-                break
-    return result
 
 
 def runtime():
@@ -114,8 +98,8 @@ def prepare_sources(source,dest):
         text=p.read_text(encoding='utf-8',errors='replace')
         # 禁止提交自带日志/提前停止/外部文件读取；本包是本地可信代码的功能工具，不是公网沙箱。
         stripped=re.sub(r'//[^\n]*|/\*.*?\*/','',text,flags=re.S)
-        bad=re.search(r'\$(finish|stop|fatal|fopen|system)\b',stripped)
-        if bad:raise ValueError(f'{p.name} 含不允许的仿真任务 ${bad.group(1)}；请移除自行终止或外部副作用任务；P5 的日志和 IM 读取可以保留')
+        bad=re.search(r'\$(display|write|monitor|strobe|finish|stop|fatal|readmemh|readmemb|fopen|system)\b',stripped)
+        if bad:raise ValueError(f'{p.name} 含不允许的仿真任务 ${bad.group(1)}；请移除内部存储器和打印，仅提交 P6 RTL')
         units.append(p)
     if not units:raise ValueError('没有找到 RTL .v 文件')
     if sum(bool(re.search(r'\bmodule\s+mips\b',p.read_text(errors='replace'))) for p in units)!=1:
@@ -153,11 +137,11 @@ def judge(problem,source,encoding='practice',case_ids=None,on_result=None,timeou
             iv,vvp,lib=runtime()
             args=[iv]
             if lib:args+=['-B',os.path.relpath(str(lib),str(work))]
-            args+=['-g2005','-s','p5_judge_tb','-o','submission.vvp']
+            args+=['-g2005','-s','p6_judge_tb','-o','submission.vvp']
             for value in defines:args+=['-D'+value]
             for directory in sorted({u.parent for u in units}):args+=['-I',os.path.relpath(str(directory),str(work))]
-            tb=work/'p5_judge_tb.v';shutil.copy2(ROOT/'p5_judge_tb.v',tb)
-            args+=[os.path.relpath(str(u),str(work)) for u in units]+['p5_judge_tb.v']
+            tb=work/'p6_judge_tb.v';shutil.copy2(ROOT/'p6_judge_tb.v',tb)
+            args+=[os.path.relpath(str(u),str(work)) for u in units]+['p6_judge_tb.v']
             compiled=run_process(args,work,30)
             diagnostics=compiled.stdout+compiled.stderr
             ce=compiled.returncode!=0
