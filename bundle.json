@@ -1,0 +1,18 @@
+{
+  "name": "P6-AI-Judge",
+  "format_version": 1,
+  "problems": 39,
+  "cases_per_problem": 24,
+  "cases": 936,
+  "original_cases": 216,
+  "cli": "ai_judge.py",
+  "ai_instructions": "AGENTS.md",
+  "catalog": "cases.json",
+  "backend": "Icarus Verilog native",
+  "dependencies": [
+    "Python >=3.9",
+    "iverilog",
+    "vvp"
+  ],
+  "requires_web_server": false
+}
