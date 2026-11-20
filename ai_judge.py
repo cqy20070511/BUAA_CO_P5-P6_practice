@@ -68,14 +68,14 @@ def check_data(selected=None):
 
 
 def build_parser():
-    parser=argparse.ArgumentParser(description='P6 AI 命令行仿真评测，必须明确指定题目和编码')
+    parser=argparse.ArgumentParser(description='P5 AI 命令行仿真评测，必须明确指定题目和编码')
     commands=parser.add_subparsers(dest='command',required=True)
     commands.add_parser('doctor',help='检查本机 Python 和 Icarus')
     commands.add_parser('list',help='列出题号、指令和编码')
     desc=commands.add_parser('describe',help='读取完整题面和测试点信息');desc.add_argument('problem')
     verify=commands.add_parser('check-data',help='核验机器码和标准答案');verify.add_argument('problem',nargs='?')
     run=commands.add_parser('run',help='真实编译和仿真用户 RTL')
-    run.add_argument('problem',help='题号或指令名，例如 Q12 或 bezal')
+    run.add_argument('problem',help='题号或指令名，例如 Q01 或 cco')
     run.add_argument('source',help='用户 RTL 源码目录、ZIP 或单个完整 .v 文件')
     run.add_argument('--encoding',required=True,choices=('practice','original'))
     run.add_argument('--case',nargs='+',dest='cases',help='只跑指定点，例如 01 02 24；默认全题 24 点')
@@ -107,6 +107,8 @@ def main():
         result=engine.judge(spec['id'],args.source,encoding=args.encoding,case_ids=ids,
                             on_result=engine.report,timeout=args.timeout,backend='native')
         result['instruction']=spec['name']
+        result['stage']='P5'
+        result['global_id']='P5-'+spec['id']
         result['selected_encoding']=spec['original_bits'] if args.encoding=='original' else spec['encoding_bits']
         if args.json_path:
             path=Path(args.json_path);path.parent.mkdir(parents=True,exist_ok=True)

@@ -1,18 +1,31 @@
 {
   "name": "P6-AI-Judge",
-  "format_version": 1,
-  "problems": 39,
-  "cases_per_problem": 24,
-  "cases": 936,
+  "format_version": 2,
+  "base": "original P6 AI sharing package",
+  "cli": "co_judge.py",
+  "legacy_p6_cli": "ai_judge.py",
+  "problems": 79,
+  "cases": 1896,
   "original_cases": 216,
-  "cli": "ai_judge.py",
-  "ai_instructions": "AGENTS.md",
-  "catalog": "cases.json",
-  "backend": "Icarus Verilog native",
+  "stages": {
+    "P5": {
+      "path": "p5",
+      "problems": 40,
+      "cases": 960
+    },
+    "P6": {
+      "path": ".",
+      "problems": 39,
+      "cases": 936
+    }
+  },
+  "excluded_p5_teaching": true,
   "dependencies": [
     "Python >=3.9",
     "iverilog",
     "vvp"
   ],
-  "requires_web_server": false
+  "requires_web_server": false,
+  "repository_case_storage": "generated",
+  "prepare_cli": "prepare_cases.py"
 }

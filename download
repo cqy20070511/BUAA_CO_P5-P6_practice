@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+runs/
+results/
+submissions/
+*.vvp
+*.vcd
+*.fst
+*.zip
+.env
+.venv/
+.DS_Store
+Thumbs.db
+
+# 测试点由固定输入生成；不重复提交派生机器码和日志。
+/tests/
+/p5/tests/

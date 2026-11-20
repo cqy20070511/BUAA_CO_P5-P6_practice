@@ -1,14 +1,13 @@
-# 给执行评测的 AI
+# P5 评测说明
 
-本仓库用于真实编译、仿真用户的 P6 CPU，并比较逐条写入日志。
+本目录有 29 道往年资料改编题 Q01—Q29、原 10 道模拟题 M01—M10，以及原 BLZTAL 补充题 X01。不包含原五道教学题。
 
-1. 读取 README.md。用 `python3 ai_judge.py list` 和 `describe <指令名>` 查找对应题目。
-2. 阅读用户提交的 Controller，确认指令行为与 opcode/funct。Q01=blezalc，Q12=bezal，二者不能互换。不要仅根据 ZIP 文件名或用户工程中的 Qxx 文件夹名选题。若编码或题意无法确认，先给出具体差异，再请用户澄清。
-3. 用 `python3 ai_judge.py doctor` 检查环境。允许的环境内安装 Python/Icarus 或使用已有工具；若工具、权限或源码缺失，明确报告尚未运行，不能猜测 AC/WA。
-4. 先保持用户源码和测试数据不变，运行 `python3 ai_judge.py run <题号或指令名> <源码目录或ZIP> --encoding <practice或original> --json results/<名称>.json`。正常评测全题 24 点，不只挑能通过的点。
-5. 结果必须包含题号、指令名、编码模式、通过数，以及每点 AC/WA/TLE/CE/RE。WA 提供首个不一致的 PC、目的、期望值和实际值；CE 提供编译诊断；说明日志位置。
-6. 只能把实际执行的仿真结果报告为测试结果。`check-data` 验证的是测试集和参考模型，不证明用户 CPU 正确；阅读源码和推理也不能替代仿真。
-7. 执行评测时，不为获得 AC 改写 code.txt、expected.log、case.json、周期限制或比较器。若发现测试集错误，应保留证据，明确区分测试集修正与 CPU 修正。用户授权修复 CPU 后，记录源码改动并重新运行受影响测试。
-8. 用户 CPU 顶层接口必须符合 p6_judge_tb.v 中的 mips 连接。CPU 内不打印日志，评测 TB 负责打印。不把生成的 runs、用户提交的 RTL/ZIP 或本机路径写进提交到仓库的材料。
+从仓库根目录优先调用 `python3 co_judge.py run P5-<题号或指令名> <用户源码目录或ZIP> --encoding practice --json results/p5.json`。在本目录也能调用 `python3 ai_judge.py run <题号或指令名> ...`。
 
-所有路径以克隆到的本仓库为准，无需依赖资料整理者的桌面、ISE 工程或其他本地目录。Python 仅使用标准库，运行仿真需要 Icarus 的 iverilog 和 vvp。
+P5 的顶层只有 clk、reset 两个输入，IM 和 DM 位于 CPU 内部。不能用 P6 外置存储器 testbench 编译。允许并要求 GRF/DM 打印课程规定的 `@PC: $寄存器 <= 数据`、`@PC: *地址 <= 数据`，允许 IM 用 readmemh 读取仿真目录里的 code.txt。CPU 不自行 finish 或 stop，评测 TB 负责结束。
+
+模拟题 M01—M10 对应旧练习包 Q01—Q10；机器码、期望日志及周期上限保持原样，旧测试点编号在每点 legacy_id 中。统一新编号为 01—24，X01 对应旧 BT01—BT24。
+
+所有 P5 题只提供本册明确的练习编码，不伪造“原平台编码”。题意有历史缺口的地方已在题面注明。评测时按题面和编码核对源码，保持数据和标准答案不变，实际运行后报告全部测试点状态。
+
+P5 的 testbench 跑到本点周期预算末尾；完整正确的结束标记和所有写入事件都出现才可判 AC。结果里的 cycles 是仿真运行周期，完成写入在原始日志中定位；不要把预算误报成 CPU 的最短完成周期。
